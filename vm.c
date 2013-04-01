@@ -2076,7 +2076,7 @@ nsdr(void)
 static VALUE
 rbvm_global_state_version(VALUE self)
 {
-  return ruby_vm_global_state_version;
+  return ULONG2NUM(ruby_vm_global_state_version);
 }
 
 void
