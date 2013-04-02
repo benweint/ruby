@@ -25,9 +25,7 @@
 #include <setjmp.h>
 #include <sys/types.h>
 
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
+#include "timing.c"
 
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
@@ -123,42 +121,6 @@ typedef struct gc_profile_record {
     size_t allocate_increase;
     size_t allocate_limit;
 } gc_profile_record;
-
-static double
-getrusage_time(void)
-{
-#ifdef RUSAGE_SELF
-    struct rusage usage;
-    struct timeval time;
-    getrusage(RUSAGE_SELF, &usage);
-    time = usage.ru_utime;
-    return time.tv_sec + time.tv_usec * 1e-6;
-#elif defined _WIN32
-    FILETIME creation_time, exit_time, kernel_time, user_time;
-    ULARGE_INTEGER ui;
-    LONG_LONG q;
-    double t;
-
-    if (GetProcessTimes(GetCurrentProcess(),
-			&creation_time, &exit_time, &kernel_time, &user_time) == 0)
-    {
-	return 0.0;
-    }
-    memcpy(&ui, &user_time, sizeof(FILETIME));
-    q = ui.QuadPart / 10L;
-    t = (DWORD)(q % 1000000L) * 1e-6;
-    q /= 1000000L;
-#ifdef __GNUC__
-    t += q;
-#else
-    t += (double)(DWORD)(q >> 16) * (1 << 16);
-    t += (DWORD)q & ~(~0 << 16);
-#endif
-    return t;
-#else
-    return 0.0;
-#endif
-}
 
 #define GC_PROF_TIMER_START do {\
 	if (objspace->profile.run) {\
