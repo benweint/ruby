@@ -227,7 +227,7 @@ static VALUE ruby_vm_global_state_version = 1;
 #define INC_VM_STATE_VERSION() do { \
     ruby_vm_global_state_version = (ruby_vm_global_state_version + 1); \
     if (ruby_vm_global_state_version == 0) vm_clear_all_cache(); \
-    if (cache_stats.invalidation_log != Qnil) { \
+    if (cache_stats.invalidation_log != Qnil && cache_stats.invalidation_log != Qfalse) { \
       method_cache_log_backtrace(); \
     } \
 } while (0)

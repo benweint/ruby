@@ -2099,20 +2099,16 @@ rbvm_method_cache_miss_time(VALUE self)
 }
 
 static VALUE
-rbvm_method_cache_invalidation_log_equals(VALUE self, VALUE io)
+rbvm_method_cache_invalidation_log_equals(VALUE self, VALUE state)
 {
-  char *headerfooter;
   time_t now = time(NULL);
 
-  if (io == Qnil && cache_stats.invalidation_log != Qnil) {
-    method_cache_log(cache_stats.invalidation_log,
-	"[%ld] stopped logging method cache invalidations\n", (long) now);
-  } else if (io != Qnil) {
-    method_cache_log(io,
+  if (!(state == Qfalse || state == Qnil)) {
+    method_cache_log(
 	"[%ld] started logging method cache invalidations\n", (long) now);
   }
 
-  cache_stats.invalidation_log = io;
+  cache_stats.invalidation_log = state;
 
   return Qnil;
 }

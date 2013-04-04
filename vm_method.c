@@ -1303,27 +1303,23 @@ obj_respond_to_missing(VALUE obj, VALUE mid, VALUE priv)
 }
 
 static void
-method_cache_log(VALUE io, const char *fmt, ...)
+method_cache_log(const char *fmt, ...)
 {
-  char *line;
-  va_list args;
-  va_start(args, fmt);
-  vasprintf(&line, fmt, args);
-  rb_funcall(io, rb_intern("write"), 1, rb_str_new(line, strlen(line)));
-  free(line);
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(stderr, fmt, args);
 }
 
 static int
 method_cache_print_backtrace(void *arg, VALUE file, int line, VALUE method)
 {
-    VALUE io = (VALUE)arg;
     const char *filename = NIL_P(file) ? "ruby" : RSTRING_PTR(file);
 
     if (NIL_P(method)) {
-      method_cache_log(io, "\tfrom %s:%d:in unknown method\n", filename, line);
+      method_cache_log("\tfrom %s:%d:in unknown method\n", filename, line);
     }
     else {
-      method_cache_log(io, "\tfrom %s:%d:in `%s'\n",
+      method_cache_log("\tfrom %s:%d:in `%s'\n",
 		filename, line, RSTRING_PTR(method));
     }
 
@@ -1333,7 +1329,7 @@ method_cache_print_backtrace(void *arg, VALUE file, int line, VALUE method)
 static void
 method_cache_log_backtrace(void)
 {
-  method_cache_log(cache_stats.invalidation_log,
+  method_cache_log(
   "[%ld] method cache invalidation at:\n", (long) time(NULL));
   vm_backtrace_each(GET_THREAD(), -1, NULL, method_cache_print_backtrace, (void *) cache_stats.invalidation_log);
 }
